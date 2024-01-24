@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>My Analog Clock</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(320deg, #00b0ff, #c72626d1);
+    }
+
+    #my-clock {
+      width: 300px; /* Dimensioni dell'orologio leggermente ridotte */
+      height: 300px;
+      border: 10px solid #424242; /* Colore del bordo con rilievo */
+      background: #333; /* Colore di sfondo dell'orologio */
+      border-radius: 50%;
+      box-shadow: -3px -3px 20px rgba(0, 0, 0, 0.5), inset 3px 3px 20px rgba(0, 0, 0, 0.5),
+        inset -3px -3px 20px rgba(0, 0, 0, 0.5), 3px 3px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Stile del card */
+    .card {
+        width: 500px; /* Modifica la larghezza del card come preferisci */
+        margin: 0 auto; /* Centra il card orizzontalmente */
+        border-color: #02020269;
+        opacity: 0; /* Imposta l'opacità iniziale a 0 per nascondere il card */
+        transition: width 0.5s, opacity 0.5s; /* Aggiungi una transizione per l'animazione */
+        animation: fadeIn 2s ease-in-out; /* Aggiungi l'animazione fadeIn */
+    }
+
+    .card-body{
+        background: linear-gradient(320deg, #d667ca, #949ff0);
+    }
+
+    /* Definisci l'animazione fadeIn */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+  </style>
+</head>
+
+<body>
+ 
+  <div class="container text-center mt-4">
+        <div class="row">
+            <div class="col">
+                <canvas id="my-clock"></canvas>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            <div class="col">
+                <div class="card d-none invisible">
+                    <div class="card-body">
+                        <h5 class="card-title">Data</h5>
+                        <p class="card-text" id="date">Caricamento...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+  </div>
+  <script>
+    "use strict";
+
+    const myClock = document.getElementById('my-clock');
+    const radius = 110; // Radius
+    const ctx = myClock.getContext('2d');
+
+    myClock.width = 2 * radius;
+    myClock.height = 2 * radius;
+
+    ctx.lineCap = "round";
+
+    // Disegna le lancette
+    function drawClockHand(color, width, angle, length, innerlength = 0) {
+      function calculateX(length) { return length * Math.sin(angle / 180.0 * Math.PI); }
+      function calculateY(length) { return -length * Math.cos(angle / 180.0 * Math.PI); }
+
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.moveTo(radius + calculateX(innerlength), radius + calculateY(innerlength));
+      ctx.lineTo(radius + calculateX(length), radius + calculateY(length));
+      ctx.stroke();
+    }
+
+    // Disegna l'orologio
+    function drawClock() {
+      ctx.clearRect(0, 0, 2 * radius, 2 * radius);
+
+      // Disegna le linee degli indici
+      for (let i = 0; i < 360; i += 30) {
+        if (i % 90 !== 0) {
+            drawClockHand("#bdbdcb", 2, i, 88, 75); // Colore dei tick
+        }
+      }
+
+      // Disegna le lancette
+      let currentTime = new Date(); // Ottieni l'orario corrente
+      drawClockHand("#f64d4d", 4, currentTime.getHours() * 30, 50); // Ore (rosso)
+      drawClockHand("#fff6f6", 3, currentTime.getMinutes() * 6, 70); // Minuti (bianco)
+      drawClockHand("#29b6f6", 2, currentTime.getSeconds() * 6, 80); // Secondi (blu)
+
+      // Disegna il centro
+      ctx.fillStyle = "#fff6f6"; // Colore del centro
+      ctx.beginPath();
+      ctx.arc(radius, radius, 5, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Scrivi i numeri 12, 3, 6, 9
+      ctx.fillStyle = "#fff6f6"; // Colore dei numeri
+      ctx.font = "bold 18px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("12", radius, 30);
+      ctx.fillText("3", radius * 2 - 25, radius);
+      ctx.fillText("6", radius, radius * 2 - 25);
+      ctx.fillText("9", 30, radius);
+    }
+
+    // Funzione per aggiornare la data
+    function updateDate() {
+        const currentDate = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = currentDate.toLocaleDateString('en-US', options);
+
+        // Seleziona il card e rimuovi le classi "d-none" e "invisible"
+        const card = document.querySelector('.card');
+        card.classList.remove('d-none', 'invisible');
+
+        // Applica l'animazione fadeIn al card
+        card.style.width = '500px'; // Imposta la larghezza desiderata
+        card.style.opacity = '1'; // Imposta l'opacità a 1 per mostrare il card
+        document.getElementById('date').textContent = formattedDate;
+    }
+
+    drawClock();
+    updateDate();
+
+    setInterval(drawClock, 1000);
+    setInterval(updateDate, 1000);
+  </script>
+</body>
+
+</html>
